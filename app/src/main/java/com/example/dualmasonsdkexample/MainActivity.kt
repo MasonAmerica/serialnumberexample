@@ -14,8 +14,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import com.example.dualmasonsdkexample.ui.theme.DualMasonSDKExampleTheme
-import masonamerica.platform.DeviceIdentifiers
-import masonamerica.platform.MasonFramework
+//import masonamerica.platform.DeviceIdentifiers
+//import masonamerica.platform.MasonFramework
 
 class MainActivity : ComponentActivity() {
     @RequiresApi(Build.VERSION_CODES.O)
@@ -28,8 +28,17 @@ class MainActivity : ComponentActivity() {
         } else {
             try {
                 // This will only work if deployed to a device via a Mason Controller build.
-                var di = MasonFramework.get(baseContext, DeviceIdentifiers::class.java)
-                ser = di.serial
+                //var diA = MasonFramework.get(baseContext, DeviceIdentifiers::class.java)
+                //ser = diA.serial
+
+                // Use reflection to load MasonFramework and DeviceIdentifiers at runtime
+                val masonFrameworkClass = Class.forName("masonamerica.platform.MasonFramework")
+                val deviceIdentifiersClass = Class.forName("masonamerica.platform.DeviceIdentifiers")
+                val getMethod = masonFrameworkClass.getMethod("get", android.content.Context::class.java, Class::class.java)
+                val di = getMethod.invoke(null, baseContext, deviceIdentifiersClass)
+                val getSerialMethod = deviceIdentifiersClass.getMethod("getSerial")
+                ser = getSerialMethod.invoke(di) as? String ?: "UNKNOWN"
+
             } catch (e: Exception) {
                 // ser is already set to UNKNOWN
             }
